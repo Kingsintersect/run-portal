@@ -2,20 +2,22 @@ import AppLogo from '@/components/application/AppLogo';
 import { Section } from '@/components/application/Section';
 import Header from '@/components/Header';
 import { SITE_NAME } from '@/config';
-import { Metadata, NextPage } from 'next';
+import { Metadata } from 'next';
 import Link from 'next/link';
 import React, { ReactNode } from 'react'
 
 export const metadata: Metadata = {
    title: `${SITE_NAME} - Purchase Admission Form`,
-   description: "Purchase your adminission form to apply for admission into the university.",
+   description: "Purchase your admission form to apply for admission into the university.",
 };
 
-type LayoutProps = {
-   children: ReactNode
-}
-
-const Layout: NextPage<LayoutProps> = ({ children }: LayoutProps) => {
+// No explicit props needed - let TypeScript infer
+const Layout = async ({
+   children,
+}: {
+   children: ReactNode;
+   // params will be automatically inferred by Next.js
+}) => {
 
    return (
       <main className='account'>
