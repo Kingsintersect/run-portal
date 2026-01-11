@@ -1,0 +1,73 @@
+body {
+  @apply overscroll-none bg-transparent;
+}
+
+:root {
+  --font-sans: var(--font-inter);
+  --header-height: calc(var(--spacing) * 12 + 1px);
+
+  /* 🎨 Updated Color Tokens */
+  --color-site-a: oklch(0.35 0.04 20);
+  /* #483b42 - dark gray-brown */
+  --color-site-a-light: oklch(0.4 0.03 20);
+  /* lighter gray-brown */
+  --color-site-a-dark: oklch(0.25 0.03 20);
+  /* darker gray-brown */
+
+  --color-site-b: oklch(0.62 0.17 33);
+  /* #A24A2F - reddish brown */
+  --color-site-b-light: oklch(0.7 0.15 33);
+  /* lighter reddish brown */
+  --color-site-b-dark: oklch(0.52 0.18 33);
+  /* darker reddish brown */
+
+  --color-site-c: oklch(0.6 0.1 200);
+  /* #2F89A2 - complementary teal */
+
+  --color-black: oklch(0 0 0);
+  --color-white: oklch(1 0 0);
+  --color-blue-gray: oklch(0.55 0.08 240.3);
+}
+
+.theme-scaled {
+  @media (min-width: 1024px) {
+    --radius: 0.6rem;
+    --text-lg: 1.05rem;
+    --text-base: 0.85rem;
+    --text-sm: 0.8rem;
+    --spacing: 0.222222rem;
+  }
+
+  [data-slot="card"] {
+    --spacing: 0.16rem;
+  }
+
+  [data-slot="select-trigger"],
+  [data-slot="toggle-group-item"] {
+    --spacing: 0.222222rem;
+  }
+}
+
+.theme-default,
+.theme-default-scaled {
+  /* Updated Chart gradients (mapped to new palette) */
+  --chart-1: var(--color-site-a);
+  /* #483b42 */
+  --chart-2: var(--color-site-b);
+  /* #A24A2F */
+  --chart-3: var(--color-site-c);
+  /* #2F89A2 (complementary teal) */
+  --chart-4: var(--color-site-b-light);
+  /* lighter reddish brown */
+  --chart-5: var(--color-site-a-light);
+  /* lighter gray-brown */
+
+  /* Updated primary based on #A24A2F */
+  --primary: var(--color-site-b);
+  --primary-foreground: var(--color-white);
+
+  @variant dark {
+    --primary: var(--color-site-b-dark);
+    --primary-foreground: var(--color-white);
+  }
+}
