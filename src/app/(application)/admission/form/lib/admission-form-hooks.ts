@@ -1,10 +1,9 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { FormDataTransformer, StorageManager } from "./utils";
+import { StorageManager } from "./utils";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import { submitAdmissionForm } from "@/app/actions/admission-actions";
 import { getAPIFriendlyError } from "@/lib/errorsHandler";
 import { AuthUser } from "@/types/user";
 import { ApplicationFormData, ODLApplication, applicationSchema, businessSchoolSchema, odlProgramSchema } from "@/schemas/admission-schema";
@@ -14,6 +13,7 @@ import { Path } from "react-hook-form";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ProgramType } from '@/config';
+import { appendFormData } from "@/lib/formUtils";
 
 // ============= FORM CONFIGURATION =============
 const FORM_CONFIG = {
@@ -151,21 +151,22 @@ export const useFormSubmission = (
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     const submitApplicationMutation = useMutation({
-        retry: false, // Disable retries for form submission
+        retry: false,
         mutationFn: async (data: ApplicationFormData) => {
-            if (!access_token || typeof access_token !== 'string') {
+            if (!access_token) {
                 throw new Error("Missing access token");
             }
-            const transformedData = FormDataTransformer.transform(data, programType);
-            return submitAdmissionForm(transformedData, access_token);
+
+            return submitAdmissionForm(data, access_token);
         },
         onSuccess: async () => {
             setIsSubmitted(true);
+
             if (user) {
-                updateUserInState({ ...user, is_applied: Number(true) });
+                updateUserInState({ ...user, is_applied: 1 });
             }
-            refreshUserData();
-            // await clearProgress();
+
+            await refreshUserData();
             toast.success("Application submitted successfully!");
             onSubmitSuccess?.();
         },
@@ -176,6 +177,44 @@ export const useFormSubmission = (
     });
 
     return { isSubmitted, submitApplicationMutation }
+};
+export const submitAdmissionForm = async (
+    data: ApplicationFormData,
+    access_token: string
+) => {
+    const formData = new FormData();
+    const MAX_UPLOAD_SIZE = 10 * 1024 * 1024; // 10MB
+    let totalSize = 0;
+
+    // Build FormData in the browser (SAFE)
+    appendFormData(formData, data);
+
+    // Validate size in browser (SAFE)
+    for (const value of formData.values()) {
+        if (value instanceof File) {
+            totalSize += value.size;
+        }
+    }
+
+    if (totalSize > MAX_UPLOAD_SIZE) {
+        throw new Error("Total upload size exceeds 10MB limit");
+    }
+
+    // 🔥 CALL YOUR NEXT API ROUTE (NOT remoteApiUrl)
+    const res = await fetch("/api/admission/submit", {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+        body: formData,
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Submission failed");
+    }
+
+    return res.json();
 };
 
 
