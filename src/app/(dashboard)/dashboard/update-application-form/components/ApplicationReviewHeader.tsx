@@ -28,7 +28,7 @@ export const ApplicationReviewHeader = ({ applicationId }: { applicationId: stri
                             ) : application ? (
                                 `${application.first_name} ${application.last_name} - ${application.program}`
                             ) : (
-                                'ODL ESUT - Application Review'
+                                'RUN ODL - Application Review'
                             )}
                         </p>
                     </div>
@@ -73,7 +73,7 @@ export const ApplicationReviewHeader = ({ applicationId }: { applicationId: stri
 //                 <div className="flex items-center justify-between">
 //                     <div>
 //                         <h1 className="text-2xl font-bold text-gray-900">Review Application</h1>
-//                         <p className="text-gray-600">ODL ESUT - Application Review</p>
+//                         <p className="text-gray-600">ODL RUN - Application Review</p>
 //                     </div>
 //                     <div className="flex items-center space-x-4">
 //                         {((currentApplication?.admission_status.toLowerCase() === 'pending') && isAdmin) && (

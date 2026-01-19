@@ -25,17 +25,12 @@ const nextConfig: NextConfig = {
 			},
 			{
 				protocol: "https",
-				hostname: "odl-esut.qverselearning.org",
-				pathname: "**",
-			},
-			{
-				protocol: "https",
-				hostname: "live-odl.qverselearning.org",
+				hostname: "redemers-university-lms.qverselearning.org",
 				pathname: "**",
 			},
 			{
 				protocol: "http",
-				hostname: "live-odl.qverselearning.org",
+				hostname: "redemers-university-lms.qverselearning.org",
 				pathname: "**",
 			},
 		],

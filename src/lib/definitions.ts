@@ -3,6 +3,6 @@ export type SessionPayload<T = Record<string, any>> = T & {
 	expiresAt: number;
 };
 
-export const ssoSessionKey = "sso_auth_session_odl_esut";
-export const loginSessionKey = "login_session_odl_esut";
+export const ssoSessionKey = "sso_auth_session_odl_run";
+export const loginSessionKey = "login_session_odl_run";
 export type PaymentStatus = "FULLY_PAID" | "PART_PAID" | "UNPAID" | null;

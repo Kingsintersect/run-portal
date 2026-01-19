@@ -256,7 +256,7 @@ const TermsAndConditionsPage: React.FC = () => {
                                 </div>
                                 <div className="flex items-center">
                                     <Mail className="h-4 w-4 text-blue-600 mr-3" />
-                                    <span>support.odl@esut.edu.ng</span>
+                                    <span>support.odl@run.edu.ng</span>
                                 </div>
                             </div>
                         </div>
@@ -272,11 +272,11 @@ const TermsAndConditionsPage: React.FC = () => {
                                 </div>
                                 <div className="flex items-center">
                                     <Mail className="h-4 w-4 text-blue-600 mr-3" />
-                                    <span>support.odl@esut.edu.ng</span>
+                                    <span>support.odl@run.edu.ng</span>
                                 </div>
                                 <div className="flex items-center">
                                     <GraduationCap className="h-4 w-4 text-blue-600 mr-3" />
-                                    <span>www.odl-esut.qverselearning.org</span>
+                                    <span>www.odl-run.qverselearning.org</span>
                                 </div>
                             </div>
                         </div>

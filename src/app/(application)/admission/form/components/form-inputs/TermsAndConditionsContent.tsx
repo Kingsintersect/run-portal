@@ -71,7 +71,7 @@ const TermsAndConditions = ({ lauched, setILunched }) => {
                                     Terms and Conditions
                                 </h1>
                                 <p className="text-xl text-blue-100 mb-6 max-w-3xl mx-auto">
-                                    ESUT Open Distant Learning - Enung, Enugu State, Nigeria
+                                    RUN Open Distant Learning - Akoda, Osun State, Nigeria
                                 </p>
                                 <div className="flex items-center justify-center space-x-2 text-blue-200">
                                     <Calendar className="h-5 w-5" />
@@ -268,7 +268,7 @@ const TermsAndConditions = ({ lauched, setILunched }) => {
                                         </div>
                                         <div className="flex items-center">
                                             <Mail className="h-4 w-4 text-blue-600 mr-3" />
-                                            <span>support.odl@esut.edu.ng</span>
+                                            <span>support.odl@run.edu.ng</span>
                                         </div>
                                     </div>
                                 </div>
@@ -284,11 +284,11 @@ const TermsAndConditions = ({ lauched, setILunched }) => {
                                         </div>
                                         <div className="flex items-center">
                                             <Mail className="h-4 w-4 text-blue-600 mr-3" />
-                                            <span>support.odl@esut.edu.ng</span>
+                                            <span>support.odl@run.edu.ng</span>
                                         </div>
                                         <div className="flex items-center">
                                             <GraduationCap className="h-4 w-4 text-blue-600 mr-3" />
-                                            <span>www.odl-esut.qverselearning.org</span>
+                                            <span>www.run-odl.qverselearning.org</span>
                                         </div>
                                     </div>
                                 </div>
@@ -317,7 +317,7 @@ const TermsAndConditions = ({ lauched, setILunched }) => {
                     <footer className="bg-gray-900 text-white py-8 mt-16">
                         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                             <p className="text-gray-400">
-                                © 2025 ODL ESUT. All rights reserved.
+                                © 2025 ODL RUN. All rights reserved.
                             </p>
                             <p className="text-gray-400 mt-2">
                                 This document complies with Nigerian educational regulations and institutional best practices.

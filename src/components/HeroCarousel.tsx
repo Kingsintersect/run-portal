@@ -18,7 +18,7 @@ const carouselImages: CarouselImage[] = [
     {
         url: "/slides/slide-1.jpg",
         alt: "University campus main building",
-        title: "Welcome to ODL ESUT Portal",
+        title: "Welcome to RUN ODL Portal",
         subtitle: "Discover a world of opportunities and excellence",
     },
     {
