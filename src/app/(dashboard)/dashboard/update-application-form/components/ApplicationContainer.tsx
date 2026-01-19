@@ -4,8 +4,8 @@ import { useApplication, useApplicationReview } from '@/contexts/ApplicationRevi
 import { ApplicationDetails } from './ApplicationDetails';
 import { DecisionModal } from './DecisionModal';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle, AlertCircleIcon } from 'lucide-react';
 import { admissionDecitionActionData, ApplicationApproveValues, ApplicationRejectValues } from '@/schemas/applicationReview-schema';
 
 export const ApplicationContainer = ({ id }: { id: string }) => {
@@ -42,13 +42,19 @@ export const ApplicationContainer = ({ id }: { id: string }) => {
         );
     }
 
-    if (!application) {
+    if (!application || !application.application) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-6">
-                <Alert>
-                    <AlertCircle className="h-4 w-4" />
+                <Alert variant="destructive">
+                    <AlertCircleIcon />
+                    <AlertTitle>No application data found.</AlertTitle>
                     <AlertDescription>
-                        No application data found.
+                        <p>Please verify that the student has submitted his application.</p>
+                        <ul className="list-inside list-disc text-sm">
+                            <li>Contact the project support team</li>
+                            <li>Ensure sufficient funds</li>
+                            <li>Verify billing address</li>
+                        </ul>
                     </AlertDescription>
                 </Alert>
             </div>

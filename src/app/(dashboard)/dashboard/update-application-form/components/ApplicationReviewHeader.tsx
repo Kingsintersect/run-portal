@@ -10,8 +10,9 @@ export const ApplicationReviewHeader = ({ applicationId }: { applicationId: stri
     const { user } = useAuth();
 
     const isAdmin = user?.role === "ADMIN";
+    const hasApplicationDetails = !!application?.application;
     const isPending = application?.admission_status?.toUpperCase() === 'PENDING';
-    const showActions = isPending && isAdmin;
+    const showActions = isPending && isAdmin && hasApplicationDetails;
 
     return (
         <div className="bg-white shadow-sm border-b">
