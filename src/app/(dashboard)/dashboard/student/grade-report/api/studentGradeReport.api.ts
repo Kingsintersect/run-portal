@@ -32,7 +32,7 @@ export async function getStudentGradeReport(
 		);
 
 		if (!response.ok) {
-			console.error(`Failed to fetch: ${response.status}`);
+			console.log(`Failed to fetch: ${response.status}`);
 			return [] as any;
 		}
 

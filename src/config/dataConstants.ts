@@ -185,11 +185,11 @@ export const StudentNavMain: SidebarNavConfig = {
 			items: [
 				{
 					title: "Payment History",
-					url: "/dashboard/student/student/history/student-payments",
+					url: "/dashboard/student/history/student-payments",
 				},
 				{
 					title: "Result History",
-					url: "/dashboard/student/student/history/student-results",
+					url: "/dashboard/student/history/student-results",
 				},
 			],
 			display: true,

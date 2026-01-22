@@ -1,7 +1,6 @@
 "use client";
 import Search from '@/components/ui/inputs/Search';
 import { baseUrl } from '@/config';
-import { Loader2 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react'
 import { Card } from "@/components/ui/card"
 import {
@@ -31,7 +30,7 @@ type Payment = {
 
 export const dynamic = "force-dynamic";
 
-const PaymentStatusCard = ({
+export const PaymentStatusCard = ({
   type,
   latestPayment
 }: {
@@ -101,7 +100,7 @@ const StudentsPaymentPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { access_token } = useAuth();
-  const basePath = `${baseUrl}/dashboard/student/student/history/student-payments`;
+  const basePath = `${baseUrl}/dashboard/student/history/student-payments`;
 
   const getAcademicSession = (dateString: string): string => {
     const date = new Date(dateString);
@@ -129,7 +128,7 @@ const StudentsPaymentPage = () => {
   const fetchPaymentHistory = async (access_token: string) => {
     setLoading(true);
     setError(null);
-
+    alert(access_token)
     try {
       const { success, error } = await GetStudentPaymentHistory(access_token);
       if (success) {

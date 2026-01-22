@@ -17,18 +17,15 @@ const EnrolledCourseList: React.FC<EnrolledCourseListProps> = ({ student, url })
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { access_token } = useAuth();
-    const shortCode = student?.level;
 
     useEffect(() => {
-        if (!access_token || !shortCode) {
+        if (!access_token || !student) {
             setIsLoading(false);
             return;
         }
-
         const controller = new AbortController();
         setIsLoading(true);
         setError(null);
-
         const fetchCourses = async () => {
             try {
                 // const res = await GetStudentCourses(access_token, student.id, shortCode);
@@ -55,7 +52,7 @@ const EnrolledCourseList: React.FC<EnrolledCourseListProps> = ({ student, url })
 
         fetchCourses();
         return () => controller.abort();
-    }, [access_token, student, shortCode]);
+    }, [access_token, student]);
 
     if (isLoading) {
         return (

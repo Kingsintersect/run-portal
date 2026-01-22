@@ -171,5 +171,6 @@ export async function GetStudentPaymentHistory(
 			Authorization: `Bearer ${access_token}`,
 		},
 	})) as any;
+	console.log('response', response)
 	return response;
 }
