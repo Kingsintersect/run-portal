@@ -103,7 +103,7 @@ export default function useSignInMultiStepViewModel() {
             reset({
                 academic_session: currentSession?.name ?? "",
                 academic_semester: currentSemester?.name ?? "",
-                start_year: "2025",
+                start_year: new Date().getFullYear().toString(),
                 amount: APPLICATION_FEE,
             });
         }

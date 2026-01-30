@@ -25,12 +25,12 @@ const nextConfig: NextConfig = {
 			},
 			{
 				protocol: "https",
-				hostname: "redemers-university-lms.qverselearning.org",
+				hostname: "redeemers-university.qverselearning.org",
 				pathname: "**",
 			},
 			{
 				protocol: "http",
-				hostname: "redemers-university-lms.qverselearning.org",
+				hostname: "redeemers-university.qverselearning.org",
 				pathname: "**",
 			},
 		],

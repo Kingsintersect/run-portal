@@ -314,7 +314,6 @@ const FormContent = ({
             />
         </>
     );
-    console.log('isReviewStep', isReviewStep)
     return isLastStep ? (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {content}

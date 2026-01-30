@@ -127,7 +127,7 @@ const admissionStatusConfig = {
       iconColor: "text-red-400 dark:text-red-200",
       textColor: "text-red-500",
       backgroundColor: "bg-[#fff4f4]",
-      message: "DENAIED",
+      message: "DENIED",
       icon: XCircle
    },
    [AdmissionStatusType.INPROGRESS]: {

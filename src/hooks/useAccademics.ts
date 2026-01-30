@@ -53,8 +53,30 @@ const academicsApi = {
         const currentSemester = allSemester.data.filter((item) => item.status === "ACTIVE")[0];
         return currentSemester
     },
+    getAllSemester: async (): Promise<AccademicSemesters[]> => {
+        const response = await fetch(`${remoteApiUrl}/academic-semester`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch academic sessions');
+        }
+        const allSemester = await response.json();
+        // const currentSemester = allSemester.data.filter((item) => item.status === "ACTIVE")[0];
+        return allSemester.data
+    },
 
 }
+
+export const useAllAcademicSessions = () => {
+    return useQuery({
+        queryKey: ['academic-info-allAcademicSessions'],
+        queryFn: academicsApi.getAcademicSessions,
+        staleTime: Infinity,
+        gcTime: Infinity,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        retry: 3,
+        retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
+    });
+};
 
 export const useCurrentSession = () => {
     return useQuery({
@@ -73,6 +95,19 @@ export const useCurrentSemester = () => {
     return useQuery({
         queryKey: ['academic-info-currentSemester'],
         queryFn: academicsApi.getCurrentSemester,
+        staleTime: Infinity,
+        gcTime: Infinity,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        retry: 3,
+        retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000),
+    });
+};
+
+export const useAllSemester = () => {
+    return useQuery({
+        queryKey: ['academic-info-allSemester'],
+        queryFn: academicsApi.getAllSemester,
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,

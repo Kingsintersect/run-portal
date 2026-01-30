@@ -242,7 +242,7 @@ class FormStorage {
             // Clear form data
             const store = transaction.objectStore(this.storeName);
             const deleteFormRequest = store.delete(key);
-            console.log('deleteFormRequest', deleteFormRequest)
+            // console.log('deleteFormRequest', deleteFormRequest)
 
             // Clear files
             const fileStore = transaction.objectStore(this.fileStoreName);

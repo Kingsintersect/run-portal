@@ -128,7 +128,7 @@ const StudentsPaymentPage = () => {
   const fetchPaymentHistory = async (access_token: string) => {
     setLoading(true);
     setError(null);
-    alert(access_token)
+
     try {
       const { success, error } = await GetStudentPaymentHistory(access_token);
       if (success) {

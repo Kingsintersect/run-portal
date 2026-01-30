@@ -165,9 +165,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             loading: true,
             error: null,
         }));
-
+        const { callbackUrl, ...data } = Credentials;
         try {
-            const { success, user, access_token, error: signinError } = await signinAction(Credentials);
+            const { success, user, access_token, error: signinError } = await signinAction(data);
             populateAuthState({ user, access_token, loading: false, error: null }, signinError)
             if (success) {
                 toastSuccess("successfully signed in");
@@ -183,7 +183,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         ? `/admission`
                         : `${redirectUrl}`;
                 }
-                router.push(`${redirectUrl}`);
+                console.log('Redirecting to:', callbackUrl || redirectUrl);
+                router.push(`${callbackUrl || redirectUrl}`);
                 return { success: true };
             }
             if (error) {

@@ -59,6 +59,10 @@ export const AdminNavMain: SidebarNavConfig = {
 					url: "/dashboard/admin/manage-admissions",
 				},
 				{
+					title: "Manage Students",
+					url: "/dashboard/admin/students",
+				},
+				{
 					title: "Add New User",
 					url: "/dashboard/admin/users/create",
 				},

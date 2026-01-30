@@ -18,6 +18,7 @@ type SigninFormData = z.infer<typeof SigninSchema>;
 export default function AuthPage() {
     const searchParams = useSearchParams();
     const referenceNumber = searchParams.get('email') || '';
+    const callbackUrl = searchParams.get('callbackUrl') || '';
     const { initializeLogin, loading } = useAuth();
     const {
         register,
@@ -40,7 +41,7 @@ export default function AuthPage() {
     }, [referenceNumber, setValue]);
 
     const onSubmit: SubmitHandler<SigninFormData> = async (data) => {
-        await initializeLogin(data);
+        await initializeLogin({ ...data, callbackUrl });
     };
 
     return (
