@@ -1,5 +1,5 @@
 // app/admin/students/lib/api-client.ts
-import { AcademicSession, Department, ExternalAPIResponse, Semester, Student, StudentFilters, StudentQueryParams } from "../types/student";
+import { AcademicSession, ExternalAPIResponse, ProgramItem, Student, StudentFilters, StudentQueryParams } from "../types/student";
 
 // Configuration
 const EXTERNAL_API_BASE = process.env.NEXT_PUBLIC_API_DOMAIN;
@@ -42,7 +42,6 @@ export class ApiClient {
             const token = localStorage.getItem('access_token');
             if (token) {
                 this.accessToken = token;
-                console.log('Initialized access token from localStorage');
             }
         }
     }
@@ -66,17 +65,20 @@ export class ApiClient {
             }
 
             const headers = new Headers(options.headers);
+            if (includeAccessToken && this.accessToken) {
+                headers.set('Authorization', `Bearer ${this.accessToken}`);
+            }
             headers.set('Content-Type', 'application/json');
             headers.set('Accept', 'application/json');
 
             // Build URL with query parameters
-            let url = `${EXTERNAL_API_BASE}/api/v1${endpoint}`;
+            const url = `${EXTERNAL_API_BASE}/api/v1${endpoint}`;
 
-            // Add access_token as query parameter if needed
-            if (includeAccessToken && this.accessToken) {
-                const separator = url.includes('?') ? '&' : '?';
-                url += `${separator}access_token=${encodeURIComponent(this.accessToken)}`;
-            }
+            // // Add access_token as query parameter if needed
+            // if (includeAccessToken && this.accessToken) {
+            //     const separator = url.includes('?') ? '&' : '?';
+            //     url += `${separator}access_token=${encodeURIComponent(this.accessToken)}`;
+            // }
 
             console.log(`[API Request] ${options.method || 'GET'} ${url}`);
             console.log('Access token included:', includeAccessToken && !!this.accessToken);
@@ -85,12 +87,10 @@ export class ApiClient {
                 ...options,
                 headers,
                 signal: controller.signal,
-                credentials: 'include', // Still send HTTP-only cookies
+                // credentials: 'include', // Still send HTTP-only cookies
             });
 
             clearTimeout(timeoutId);
-
-            console.log(`[API Response] ${response.status} ${response.statusText}`, endpoint);
 
             // Check for authentication issues
             if (response.status === 401) {
@@ -194,23 +194,13 @@ export class ApiClient {
                 console.warn('No access token provided for getAcademicSessions');
             }
 
-            // Temporarily override token if provided
-            const originalToken = this.accessToken;
-            if (accessToken && accessToken !== this.accessToken) {
-                this.accessToken = accessToken;
-            }
-
-            const result = await this.request<ExternalAPIResponse<AcademicSession[]>>('/academic-sessions');
-
-            // Restore original token
-            if (accessToken && accessToken !== originalToken) {
-                this.accessToken = originalToken;
-            }
+            const result = await this.request<ExternalAPIResponse<AcademicSession[]>>('/all-sessions');
 
             return result;
         } catch (error) {
             console.error('Failed to fetch academic sessions:', error);
             return {
+                status: 500,
                 success: false,
                 data: [],
                 message: error instanceof ApiError ? error.message : 'Failed to load academic sessions'
@@ -218,42 +208,9 @@ export class ApiClient {
         }
     }
 
-    // Semesters with fallback
-    static async getSemestersBySession(
-        academicSessionId: string,
-        accessToken?: string
-    ): Promise<ExternalAPIResponse<Semester[]>> {
-        try {
-            const tokenToUse = accessToken || this.accessToken;
-
-            if (!tokenToUse) {
-                console.warn('No access token provided for getSemestersBySession');
-            }
-
-            const originalToken = this.accessToken;
-            if (accessToken && accessToken !== this.accessToken) {
-                this.accessToken = accessToken;
-            }
-
-            const result = await this.request<ExternalAPIResponse<Semester[]>>(`/academic-sessions/${academicSessionId}/semesters`);
-
-            if (accessToken && accessToken !== originalToken) {
-                this.accessToken = originalToken;
-            }
-
-            return result;
-        } catch (error) {
-            console.error('Failed to fetch semesters:', error);
-            return {
-                success: false,
-                data: [],
-                message: error instanceof ApiError ? error.message : 'Failed to load semesters'
-            };
-        }
-    }
 
     // Departments with fallback
-    static async getDepartments(accessToken?: string): Promise<ExternalAPIResponse<Department[]>> {
+    static async getDepartments(accessToken?: string): Promise<ExternalAPIResponse<ProgramItem[]>> {
         try {
             const tokenToUse = accessToken || this.accessToken;
 
@@ -261,21 +218,13 @@ export class ApiClient {
                 console.warn('No access token provided for getDepartments');
             }
 
-            const originalToken = this.accessToken;
-            if (accessToken && accessToken !== this.accessToken) {
-                this.accessToken = accessToken;
-            }
-
-            const result = await this.request<ExternalAPIResponse<Department[]>>('/departments');
-
-            if (accessToken && accessToken !== originalToken) {
-                this.accessToken = originalToken;
-            }
+            const result = await this.request<ExternalAPIResponse<ProgramItem[]>>('/odl/categories');
 
             return result;
         } catch (error) {
             console.error('Failed to fetch departments:', error);
             return {
+                status: 500,
                 success: false,
                 data: [],
                 message: error instanceof ApiError ? error.message : 'Failed to load departments'
@@ -287,12 +236,13 @@ export class ApiClient {
     static async getStudents(
         params: StudentQueryParams & { access_token?: string }
     ): Promise<ExternalAPIResponse<Student[]>> {
+        console.log('Fetching students with params:', params);
         try {
             const queryParams = new URLSearchParams();
 
             // Required parameters
-            queryParams.append('academic_session_id', params.academic_session_id);
-            queryParams.append('semester_id', params.semester_id);
+            queryParams.append('academic_session', params.academic_session);
+            queryParams.append('application_status', params.application_status);
             queryParams.append('page', params.page.toString());
             queryParams.append('limit', params.limit.toString());
 
@@ -300,14 +250,8 @@ export class ApiClient {
             if (params.search) {
                 queryParams.append('search', params.search);
             }
-            if (params.department_code) {
-                queryParams.append('department_code', params.department_code);
-            }
-            if (params.status) {
-                queryParams.append('status', params.status);
-            }
-            if (params.admission_year) {
-                queryParams.append('admission_year', params.admission_year.toString());
+            if (params.program_id) {
+                queryParams.append('program_id', params.program_id);
             }
             if (params.sort_by) {
                 queryParams.append('sort_by', params.sort_by);
@@ -316,8 +260,8 @@ export class ApiClient {
                 queryParams.append('sort_order', params.sort_order);
             }
             // Add access_token to query params if provided
-            if (params.access_token) {
-                queryParams.append('access_token', params.access_token);
+            if (params.admission_status) {
+                queryParams.append('admission_status', params.admission_status);
             }
 
             // Temporarily override token if provided
@@ -326,7 +270,7 @@ export class ApiClient {
                 this.accessToken = params.access_token;
             }
 
-            const result = await this.request<ExternalAPIResponse<Student[]>>(`/students?${queryParams}`, {}, false); // false = don't auto-add token
+            const result = await this.request<ExternalAPIResponse<Student[]>>(`/admin/manage-students?${queryParams}`, {}, true); // false = don't auto-add token
 
             // Restore original token
             if (params.access_token && params.access_token !== originalToken) {
@@ -337,14 +281,23 @@ export class ApiClient {
         } catch (error) {
             console.error('Failed to fetch students:', error);
             return {
+                status: 500,
                 success: false,
                 data: [],
                 message: error instanceof ApiError ? error.message : 'Failed to load students',
-                pagination: {
-                    current_page: params.page,
-                    total_pages: 0,
-                    total_items: 0,
-                    page_size: params.limit
+                metadata: {
+                    pagination: {
+                        current_page: params.page,
+                        total_pages: 0,
+                        total: 0,
+                        count: 0,
+                        limit: params.limit
+                    },
+                    sorting: {
+                        sort_by: params.sort_by || '',
+                        sort_order: params.sort_order || ''
+                    },
+                    active_session: params.academic_session
                 }
             };
         }
@@ -358,19 +311,16 @@ export class ApiClient {
         const queryParams = new URLSearchParams();
 
         // Required parameters
-        queryParams.append('academic_session_id', filters.academic_session_id);
-        queryParams.append('semester_id', filters.semester_id);
+        queryParams.append('academic_session', filters.academic_session);
+        queryParams.append('application_status', filters.application_status);
         queryParams.append('format', format);
 
         // Optional parameters
         if (filters.search) {
             queryParams.append('search', filters.search);
         }
-        if (filters.department_code) {
-            queryParams.append('department_code', filters.department_code);
-        }
-        if (filters.status) {
-            queryParams.append('status', filters.status);
+        if (filters.program_id) {
+            queryParams.append('program_id', filters.program_id);
         }
         // Add access_token to query params if provided
         if (filters.access_token) {

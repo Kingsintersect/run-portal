@@ -53,7 +53,7 @@ export function StudentFilters({ tokenLoader }: { tokenLoader: boolean }) {
         { value: 'DENIED', label: 'Denied' },
     ];
 
-    console.log('Filters:', filters);
+    // console.log('Filters:', filters);
 
     return (
         <div className="flex flex-col gap-7 p-6 border rounded-lg bg-card shadow-sm">

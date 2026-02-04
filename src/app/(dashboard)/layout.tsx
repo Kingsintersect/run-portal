@@ -12,10 +12,9 @@ export const metadata: Metadata = {
 };
 
 const layout = async ({ children }: { children: React.ReactNode }) => {
-
    return (
-      <div className='bg-white'>
-         <main className='flex-1'>
+      <div className='bg-white overflow-hidden'> {/* ADD overflow-hidden */}
+         <main className='flex-1 min-w-0'> {/* ADD min-w-0 for flex children */}
             <MarginWidthWrapper>
                <PageWrapper>{children}</PageWrapper>
                <TeacherFeedbackIntegration />

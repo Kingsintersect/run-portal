@@ -24,6 +24,6 @@ export function mapToPaginationInfo(apiPagination: Pagination): PaginationInfo {
         current_page: apiPagination.current_page,
         total_pages: apiPagination.total_pages,
         total_items: apiPagination.total,
-        page_size: apiPagination.per_page,
+        page_size: apiPagination.limit,
     };
 }

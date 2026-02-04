@@ -9,7 +9,7 @@ export interface Metadata {
 export interface Pagination {
     total: number;
     count: number;
-    per_page: number;
+    limit: number;
     current_page: number;
     total_pages: number;
 }

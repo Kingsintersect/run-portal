@@ -1,4 +1,4 @@
-import { PaginationInfo } from '../types/student';
+import { Pagination, PaginationInfo } from '../types/student';
 
 export const getSafePagination = (pagination: PaginationInfo | null | undefined): PaginationInfo => ({
     current_page: pagination?.current_page ?? 1,
@@ -17,3 +17,13 @@ export const isValidPagination = (pagination: PaginationInfo): pagination is Pag
         typeof pagination.page_size === 'number'
     );
 };
+
+// Helper function to convert API pagination to your PaginationInfo:
+export function mapToPaginationInfo(apiPagination: Pagination): PaginationInfo {
+    return {
+        current_page: apiPagination.current_page,
+        total_pages: apiPagination.total_pages,
+        total_items: apiPagination.total,
+        page_size: apiPagination.limit,
+    };
+}

@@ -7,12 +7,11 @@ import { PageSizeSelector } from './components/PageSizeSelector';
 import { ExportButton } from './components/ExportButton';
 import { useStudentStore } from './store/useStudentStore';
 import { useEffect } from 'react';
-import { Users, AlertCircle, Loader2 } from 'lucide-react';
+import { Users, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAccessToken } from './hooks/useAccessToken';
-
 
 export default function StudentsPage() {
     const { token, isLoading: tokenLoading } = useAccessToken();
@@ -22,9 +21,8 @@ export default function StudentsPage() {
     useEffect(() => {
         if (!tokenLoading && token) {
             fetchAcademicData(token);
-            fetchStudents(token);
         }
-    }, [fetchAcademicData, fetchStudents, token, tokenLoading]);
+    }, [fetchAcademicData, token, tokenLoading]);
 
     const handleSortChange = (sortBy: string, sortOrder: 'asc' | 'desc') => {
         // Update sorting in store and refetch
@@ -32,19 +30,18 @@ export default function StudentsPage() {
     };
 
     return (
-        <div className="container mx-auto p-4 md:p-6 max-w-7xl">
+        <div className="container mx-auto p-4 md:p-6 overflow-x-hidden">
             {/* Header */}
             <div className="mb-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                             <Users className="h-6 w-6 text-primary" />
-                            {tokenLoading && <Loader2 className='h-7 w-7 animate-spin text-blue-500' />}
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight">Student Management</h1>
+                            <h1 className="text-3xl font-bold tracking-tight">Manage Students</h1>
                             <p className="text-muted-foreground">
-                                Manage and view students with filtering by academic session and semester
+                                Manage and view details. filtering by application status. Update student inform.ation and view application details.
                             </p>
                         </div>
                     </div>
@@ -60,20 +57,11 @@ export default function StudentsPage() {
                         </Button>
                     </div>
                 </div>
-
-                {/* Performance Note */}
-                <Alert className="mb-6 bg-blue-50 border-blue-200">
-                    <AlertCircle className="h-4 w-4 text-blue-600" />
-                    <AlertDescription className="text-blue-700">
-                        Showing paginated results from external API. Use filters to narrow down
-                        results for better performance with 10,000+ student records.
-                    </AlertDescription>
-                </Alert>
             </div>
 
             {/* Main Content */}
             <div className="space-y-6">
-                <StudentFilters />
+                <StudentFilters tokenLoader={tokenLoading} />
 
                 {/* Table Controls */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -105,5 +93,3 @@ export default function StudentsPage() {
         </div>
     );
 }
-
-// Helper components

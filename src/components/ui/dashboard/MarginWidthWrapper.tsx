@@ -10,13 +10,14 @@ import SiteHeader from '@/components/site-header';
 
 const MarginWidthWrapper = ({ children }: { children: ReactNode }) => {
    const { user, initializeLogout } = useAuth();
-   // const isLoggedIn = !!user; // Check if user is logged in
    return (
       <SidebarProvider>
          <AppSidebar user={user} />
-         <SidebarInset>
+         <SidebarInset className="overflow-x-hidden"> {/* ADD overflow-x-hidden */}
             <SiteHeader logout={initializeLogout} />
-            {children}
+            <div className="min-w-0 w-full"> {/* ADD wrapper with min-w-0 */}
+               {children}
+            </div>
          </SidebarInset>
       </SidebarProvider>
    )

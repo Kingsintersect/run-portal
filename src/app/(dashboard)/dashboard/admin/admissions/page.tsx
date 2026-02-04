@@ -13,7 +13,6 @@ import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAccessToken } from './hooks/useAccessToken';
 
-
 export default function StudentsPage() {
     const { token, isLoading: tokenLoading } = useAccessToken();
     const { fetchStudents, error, clearError, fetchAcademicData } = useStudentStore();
@@ -31,7 +30,7 @@ export default function StudentsPage() {
     };
 
     return (
-        <div className="container mx-auto p-4 md:p-6 max-w-7xl">
+        <div className="container mx-auto p-4 md:p-6 overflow-x-hidden">
             {/* Header */}
             <div className="mb-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">

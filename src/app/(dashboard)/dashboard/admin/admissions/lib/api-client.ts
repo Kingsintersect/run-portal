@@ -291,7 +291,7 @@ export class ApiClient {
                         total_pages: 0,
                         total: 0,
                         count: 0,
-                        per_page: params.limit
+                        limit: params.limit
                     },
                     sorting: {
                         sort_by: params.sort_by || '',

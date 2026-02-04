@@ -4,11 +4,11 @@ import { ApiClient } from '../lib/api-client';
 import {
     Student,
     StudentFilters,
-    AcademicSession,
-    Semester,
-    Department,
-    PaginationInfo
+    ProgramItem,
+    PaginationInfo,
+    AcademicSession
 } from '../types/student';
+import { mapToPaginationInfo } from '../lib/utils';
 
 interface StudentStoreState {
     // State
@@ -18,25 +18,36 @@ interface StudentStoreState {
     pagination: PaginationInfo;
     filters: StudentFilters;
     academicSessions: AcademicSession[];
-    semesters: Semester[];
-    departments: Department[];
+    // semesters: Semester[];
+    allPrograms: ProgramItem[];  // Store ALL programs
+    parentPrograms: ProgramItem[];  // Only parent programs (parent === 0)
+    childPrograms: ProgramItem[];   // Child programs based on selected parent
 
     // Actions
     setFilters: (filters: Partial<StudentFilters>) => void;
     setPageSize: (pageSize: number) => void;
     setCurrentPage: (page: number) => void;
     setSorting: (sortBy: string, sortOrder: 'asc' | 'desc') => void;
-    fetchStudents: (accessToken?: string) => Promise<void>; // Accept token as parameter
+    fetchStudents: (accessToken?: string) => Promise<void>;
     fetchAcademicData: (accessToken?: string) => Promise<void>;
     resetFilters: () => void;
     clearError: () => void;
+    // Add this action
+    updateChildPrograms: (parentId?: number, allPrograms?: ProgramItem[]) => void;
+
+    sorting: {
+        sort_by: string;
+        sort_order: 'asc' | 'desc';
+    };
 }
 
 const initialFilters: StudentFilters = {
-    academic_session_id: '',
-    semester_id: '',
+    academic_session: '',
+    application_status: '',
     search: '',
-    department_code: '',
+    program_id: '',
+    parent_program_id: '',
+    admission_status: '',
 };
 
 const initialPagination: PaginationInfo = {
@@ -58,33 +69,78 @@ export const useStudentStore = create<StudentStoreState>()(
                 filters: initialFilters,
                 academicSessions: [],
                 semesters: [],
-                departments: [],
+                allPrograms: [],
+                parentPrograms: [],
+                childPrograms: [],
+                sorting: {
+                    sort_by: 'created_at',
+                    sort_order: 'desc',
+                },
 
                 // Actions
                 setFilters: (newFilters) => {
-                    const updatedFilters = { ...get().filters, ...newFilters };
+                    const state = get();
+                    const updatedFilters = { ...state.filters, ...newFilters };
 
                     // Type-safe handling of 'all' values
-                    if (updatedFilters.department_code === 'all') {
-                        updatedFilters.department_code = undefined;
+                    if (updatedFilters.parent_program_id === 'all') {
+                        updatedFilters.parent_program_id = undefined;
+                        updatedFilters.program_id = undefined; // Clear child program when parent is "all"
+                    }
+                    if (updatedFilters.program_id === 'all') {
+                        updatedFilters.program_id = undefined;
                     }
 
-                    if (updatedFilters.status === 'all') {
-                        updatedFilters.status = undefined;
+                    if (updatedFilters.admission_status === 'all') {
+                        updatedFilters.admission_status = undefined;
                     }
+
+                    // Only trigger API call if these specific fields change
+                    const shouldTriggerAPICall =
+                        newFilters.academic_session !== undefined ||
+                        newFilters.application_status !== undefined ||
+                        newFilters.program_id !== undefined ||
+                        newFilters.search !== undefined ||
+                        newFilters.admission_status !== undefined
 
                     set({
-                        filters: updatedFilters as StudentFilters, // Cast to ensure type safety
-                        pagination: { ...get().pagination, current_page: 1 },
+                        filters: updatedFilters as StudentFilters,
+                        pagination: { ...state.pagination, current_page: 1 },
                     });
 
-                    // If academic session changed, fetch semesters
-                    if (newFilters.academic_session_id &&
-                        newFilters.academic_session_id !== get().filters.academic_session_id) {
-                        get().fetchAcademicData();
+                    // If parent_program_id changed, update child programs
+                    if (newFilters.parent_program_id !== undefined) {
+                        const parentId = newFilters.parent_program_id ? parseInt(newFilters.parent_program_id) : undefined;
+                        get().updateChildPrograms(parentId);
                     }
 
-                    get().fetchStudents();
+                    // Only fetch students if relevant filters changed
+                    if (shouldTriggerAPICall) {
+                        get().fetchStudents();
+                    }
+                },
+
+                // Add this new action
+                updateChildPrograms: (parentId?: number, allPrograms?: ProgramItem[]) => {
+                    const state = get();
+                    const programsToFilter = allPrograms || state.allPrograms;
+
+                    if (!parentId || !programsToFilter.length) {
+                        set({ childPrograms: [] });
+                        return;
+                    }
+
+                    // Filter child programs from the provided programs
+                    const childPrograms = programsToFilter.filter(item => item.parent === parentId);
+                    set({ childPrograms });
+
+                    // Optional: Auto-select first child program when parent changes
+                    // Only if no child program is currently selected
+                    if (childPrograms.length > 0 && !state.filters.program_id) {
+                        // You can enable this if you want to auto-select first child
+                        // const newFilters = { ...state.filters, program_id: String(childPrograms[0].id) };
+                        // set({ filters: newFilters as StudentFilters });
+                    }
                 },
 
                 setPageSize: (pageSize) => {
@@ -105,17 +161,18 @@ export const useStudentStore = create<StudentStoreState>()(
                     get().fetchStudents();
                 },
 
-                setSorting: (sortBy, sortOrder) => {
-                    // In a real implementation, you'd update filters and refetch
-                    // For now, we'll just trigger a refetch with current filters
+                setSorting: (sortBy: string, sortOrder: 'asc' | 'desc') => {
+                    set((state) => ({
+                        sorting: { ...state.sorting, sort_by: sortBy, sort_order: sortOrder },
+                    }));
                     get().fetchStudents();
                 },
 
                 fetchStudents: async (accessToken?: string) => {
-                    const { filters, pagination } = get();
+                    const { filters, pagination, sorting } = get();
 
                     // Validate required filters
-                    if (!filters.academic_session_id || !filters.semester_id) {
+                    if (!filters.academic_session) {
                         return;
                     }
 
@@ -123,26 +180,35 @@ export const useStudentStore = create<StudentStoreState>()(
 
                     try {
                         const queryParams = {
-                            academic_session_id: filters.academic_session_id,
-                            semester_id: filters.semester_id,
+                            academic_session: filters.academic_session,
+                            application_status: filters.application_status,
                             page: pagination.current_page,
                             limit: pagination.page_size,
                             ...(filters.search && { search: filters.search }),
-                            ...(filters.department_code && { department_code: filters.department_code }),
-                            ...(filters.status && { status: filters.status }),
-                            ...(filters.admission_year && { admission_year: filters.admission_year }),
-                            ...(accessToken && { access_token: accessToken }), // Pass token if provided
+                            ...(filters.program_id && { program_id: filters.program_id }),
+                            ...(filters.admission_status && { admission_status: filters.admission_status }),
+
+                            // ADD THESE PARAMETERS:
+                            sort_by: sorting.sort_by,
+                            sort_order: sorting.sort_order,
+
+                            ...(accessToken && { access_token: accessToken }),
                         };
 
                         const response = await ApiClient.getStudents(queryParams);
 
-                        if (!response.success) {
+                        if (response.status !== 200 || !response.success) {
                             throw new Error(response.message || 'Failed to fetch students');
                         }
 
+                        // Update pagination from response
+                        const updatedPagination = response.metadata?.pagination
+                            ? mapToPaginationInfo(response.metadata.pagination)
+                            : pagination;
+
                         set({
                             students: response.data,
-                            pagination: response.pagination || initialPagination,
+                            pagination: updatedPagination,
                             isLoading: false,
                         });
                     } catch (error) {
@@ -159,36 +225,47 @@ export const useStudentStore = create<StudentStoreState>()(
                     try {
                         // Fetch academic sessions with token
                         const sessionsResponse = await ApiClient.getAcademicSessions(accessToken);
-                        if (sessionsResponse.success) {
-                            set({ academicSessions: sessionsResponse.data });
+
+                        if (sessionsResponse.status === 200) {
+                            const academicSessions = sessionsResponse.data;
+                            set({ academicSessions });
 
                             // Auto-select current session
-                            const currentSession = sessionsResponse.data.find(s => s.is_current);
-                            if (currentSession && !filters.academic_session_id) {
-                                get().setFilters({ academic_session_id: currentSession.id });
+                            const currentSession = academicSessions.find(s => s.status === "ACTIVE");
+                            console.log('Current Academic Session:', currentSession);
+                            if (currentSession && !filters.academic_session) {
+                                console.log('Setting default academic session to:', currentSession.name);
+                                const newFilters = { ...filters, academic_session: currentSession.name };
+                                set({ filters: newFilters as StudentFilters });
+                                // This will trigger fetchStudents because academic_session changed
                             }
                         }
 
-                        // Fetch semesters with token
-                        if (filters.academic_session_id) {
-                            const semestersResponse = await ApiClient.getSemestersBySession(
-                                filters.academic_session_id,
-                                accessToken
-                            );
-                            if (semestersResponse.success) {
-                                set({ semesters: semestersResponse.data });
+                        // Fetch ALL programs with token
+                        const programsResponse = await ApiClient.getDepartments(accessToken);
 
-                                const currentSemester = semestersResponse.data.find(s => s.is_current);
-                                if (currentSemester && !filters.semester_id) {
-                                    get().setFilters({ semester_id: currentSemester.id });
-                                }
+                        if (programsResponse.data.length > 0) {
+                            const allPrograms = programsResponse.data.map(item => ({
+                                ...item,
+                                label: item.name.trim(),
+                                value: String(item.id)
+                            }));
+
+                            // Filter parent programs
+                            const parentPrograms = allPrograms.filter(item => item.parent === 0);
+
+                            set({
+                                allPrograms,
+                                parentPrograms
+                            });
+
+                            // If we have a selected parent program, update child programs
+                            if (filters.parent_program_id && filters.parent_program_id !== 'all') {
+                                const parentId = parseInt(filters.parent_program_id);
+                                get().updateChildPrograms(parentId, allPrograms);
                             }
-                        }
-
-                        // Fetch departments with token
-                        const departmentsResponse = await ApiClient.getDepartments(accessToken);
-                        if (departmentsResponse.success) {
-                            set({ departments: departmentsResponse.data });
+                        } else {
+                            console.log('No programs fetched or error:', programsResponse);
                         }
                     } catch (error) {
                         console.error('Failed to fetch academic data:', error);
@@ -199,6 +276,7 @@ export const useStudentStore = create<StudentStoreState>()(
                     set({
                         filters: initialFilters,
                         pagination: initialPagination,
+                        childPrograms: [],
                     });
                 },
 
@@ -216,3 +294,17 @@ export const useStudentStore = create<StudentStoreState>()(
         )
     )
 );
+
+
+export const useAllPrograms = () => useStudentStore((state) => state.allPrograms);
+export const useParentPrograms = () => useStudentStore((state) => state.parentPrograms);
+export const useChildPrograms = () => useStudentStore((state) => state.childPrograms);
+export const useAcademicSessions = () => useStudentStore((state) => state.academicSessions);
+export const useFilters = () => useStudentStore((state) => state.filters);
+export const useIsLoading = () => useStudentStore((state) => state.isLoading);
+export const useStudentActions = () => ({
+    setFilters: useStudentStore((state) => state.setFilters),
+    resetFilters: useStudentStore((state) => state.resetFilters),
+    updateChildPrograms: useStudentStore((state) => state.updateChildPrograms),
+    // ... other actions
+});

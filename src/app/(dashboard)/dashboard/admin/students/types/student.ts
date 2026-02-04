@@ -1,26 +1,43 @@
+import { UserInterface } from "@/config/Types";
+
+export interface Metadata {
+    active_session: string;
+    pagination: Pagination;
+    sorting: Sorting;
+}
+
+export interface Pagination {
+    total: number;
+    count: number;
+    limit: number;
+    current_page: number;
+    total_pages: number;
+}
+
+export interface Sorting {
+    sort_by: string;
+    sort_order: 'asc' | 'desc' | string;
+}
+
 // External API response types
 export interface ExternalAPIResponse<T> {
+    status: number;
     success: boolean;
     data: T;
     message?: string;
-    pagination?: {
-        current_page: number;
-        total_pages: number;
-        total_items: number;
-        page_size: number;
-    };
+    metadata?: Metadata;
 }
 
-export type StudentStatus = 'active' | 'inactive' | 'graduated' | 'suspended';
+// export type StudentStatus = 'active' | 'inactive' | 'graduated' | 'suspended';
 
-export interface Student {
-    id: string;
+export interface Student extends UserInterface{
+    // id: number;
     student_id: string;
     full_name: string;
     email: string;
-    phone_number?: string;
+    // phone_number?: string;
     admission_year: number;
-    department_code: string;
+    program_id: string;
     department_name: string;
     program_name: string;
     current_status: 'active' | 'inactive' | 'graduated' | 'suspended';
@@ -28,8 +45,8 @@ export interface Student {
     created_at: string;
     updated_at: string;
     enrollment?: {
-        academic_session_id: string;
-        semester_id: string;
+        academic_session: string;
+        program_id: string;
         courses?: Array<{
             course_code: string;
             course_name: string;
@@ -40,23 +57,10 @@ export interface Student {
 
 export interface AcademicSession {
     id: string;
-    code: string;
     name: string;
     start_date: string;
     end_date: string;
-    is_current: boolean;
-    status: 'active' | 'completed' | 'upcoming';
-}
-
-export interface Semester {
-    id: string;
-    academic_session_id: string;
-    code: string;
-    name: string;
-    order: number;
-    start_date: string;
-    end_date: string;
-    is_current: boolean;
+    status: "ACTIVE" | "INACTIVE";
 }
 
 export interface Department {
@@ -64,14 +68,25 @@ export interface Department {
     name: string;
     faculty: string;
 }
-
+export interface ProgramItem {
+    id: number;
+    name: string;
+    parent: number;
+    sortorder: number;
+}
+export interface MappedProgramItem {
+    id: number;
+    label: string;
+    value: string;
+}
 export interface StudentFilters {
-    academic_session_id: string;
-    semester_id: string;
+    academic_session: string;
+    application_status: string;
     search?: string;
-    department_code?: string | 'all';
-    status?: StudentStatus | 'all';
-    admission_year?: number;
+    program_id?: string | 'all';
+    parent_program_id?: string | 'all';
+    // addiition
+    admission_status?: string;
 }
 
 export interface StudentQueryParams extends StudentFilters {

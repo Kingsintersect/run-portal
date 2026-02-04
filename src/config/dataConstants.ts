@@ -56,7 +56,7 @@ export const AdminNavMain: SidebarNavConfig = {
 			items: [
 				{
 					title: "Manage Admission",
-					url: "/dashboard/admin/manage-admissions",
+					url: "/dashboard/admin/admissions",
 				},
 				{
 					title: "Manage Students",

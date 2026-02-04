@@ -44,14 +44,15 @@ export default async function middleware(req: NextRequest) {
 	if (!user) {
 		if (protectedRoutes.some(p => path.startsWith(p))) {
 			// Get the current full URL (path + query params)
-			const currentUrl = `${req.nextUrl.pathname}${req.nextUrl.search}`;
+			const currentUrl = `${path}${req.nextUrl.search}`;
 
 			// Create redirect URL to signin page
 			const signinUrl = new URL('/auth/signin', req.url);
 
 			// Add callback URL parameter (only if not already on auth page to avoid loops)
 			if (!path.startsWith('/auth')) {
-				signinUrl.searchParams.set('callbackUrl', encodeURIComponent(currentUrl));
+				// Only encode once
+				signinUrl.searchParams.set('callbackUrl', currentUrl);
 			}
 
 			return NextResponse.redirect(signinUrl);
@@ -60,45 +61,58 @@ export default async function middleware(req: NextRequest) {
 	}
 
 	// 3. Handle authenticated users on public routes (redirect them appropriately)
-	if (publicRoutes.includes(path)) {
-		if (user) {
-			if (path === ('/admission/form')) {
-				if (role === Roles.STUDENT && hasApplied) {
-					return NextResponse.redirect(new URL('/admission', req.url));
-				}
-				if (role !== Roles.STUDENT) {
-					return NextResponse.redirect(new URL(`/dashboard/${role.toLowerCase()}`, req.url));
-				}
-				return NextResponse.next();
-			}
+	if (publicRoutes.some(publicPath => path.startsWith(publicPath))) {
+		// For logged-in users accessing auth pages, check for callbackUrl
+		if (path.startsWith('/auth/signin') || path.startsWith('/auth/signup')) {
+			const callbackUrl = req.nextUrl.searchParams.get('callbackUrl');
 
-			// For logged-in users accessing auth pages, check for callbackUrl
-			if (path.startsWith('/auth/signin') || path.startsWith('/auth/signup')) {
-				const callbackUrl = req.nextUrl.searchParams.get('callbackUrl');
+			// If there's a valid callback URL, redirect there
+			if (callbackUrl) {
+				try {
+					// The callbackUrl should be a path, not a full URL
+					let callbackPath = callbackUrl;
 
-				// If there's a valid callback URL, redirect there
-				if (callbackUrl) {
-					try {
-						const decodedUrl = decodeURIComponent(callbackUrl);
-						// Validate it's a safe URL (same origin)
-						const parsedUrl = new URL(decodedUrl, req.url);
-						if (parsedUrl.origin === req.nextUrl.origin) {
-							return NextResponse.redirect(parsedUrl);
-						}
-					} catch {
-						// If URL is invalid, redirect to default
+					// Remove leading slash if present to avoid double slashes
+					if (callbackPath.startsWith('/')) {
+						callbackPath = callbackPath.substring(1);
 					}
-				}
 
-				// Default redirect for logged-in users on auth pages
-				const redirectPath = (role === Roles.STUDENT)
-					? hasApplied
-						? '/dashboard/student'
-						: '/admission'
-					: `/dashboard/${role.toLowerCase()}`;
-				return NextResponse.redirect(new URL(redirectPath, req.url));
+					// Create a proper URL object
+					const redirectUrl = new URL(callbackPath, req.url);
+
+					// Validate it's a safe URL (same origin)
+					if (redirectUrl.origin === req.nextUrl.origin) {
+						return NextResponse.redirect(redirectUrl);
+					}
+				} catch (error) {
+					console.error('Error parsing callback URL:', error);
+					// If URL is invalid, continue to default redirect
+				}
 			}
+
+			// Default redirect for logged-in users on auth pages
+			let redirectPath = '/dashboard';
+
+			if (role === Roles.STUDENT) {
+				redirectPath = hasApplied ? '/dashboard/student' : '/admission';
+			} else if (role) {
+				redirectPath = `/dashboard/${role.toLowerCase()}`;
+			}
+
+			return NextResponse.redirect(new URL(redirectPath, req.url));
 		}
+
+		// Handle admission form special case
+		if (path === ('/admission/form')) {
+			if (role === Roles.STUDENT && hasApplied) {
+				return NextResponse.redirect(new URL('/admission', req.url));
+			}
+			if (role !== Roles.STUDENT) {
+				return NextResponse.redirect(new URL(`/dashboard/${role.toLowerCase()}`, req.url));
+			}
+			return NextResponse.next();
+		}
+
 		return NextResponse.next();
 	}
 
@@ -141,19 +155,6 @@ export default async function middleware(req: NextRequest) {
 			return NextResponse.next();
 		}
 
-		// Handle token expiration scenario (simplified example)
-		// You might want to add actual token expiration check here
-		// if (isTokenExpired(user.token)) {
-		//   const currentUrl = `${req.nextUrl.pathname}${req.nextUrl.search}`;
-		//   const signinUrl = new URL('/auth/signin', req.url);
-		//   signinUrl.searchParams.set('callbackUrl', encodeURIComponent(currentUrl));
-		//   
-		//   // Clear session
-		//   const response = NextResponse.redirect(signinUrl);
-		//   response.cookies.delete('session_token'); // Adjust to your cookie name
-		//   return response;
-		// }
-
 		return NextResponse.next();
 	}
 
@@ -165,7 +166,6 @@ export const config = {
 		"/((?!api|_next/static|_next/image|images/.*|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.gif$).*)",
 	],
 };
-
 
 
 

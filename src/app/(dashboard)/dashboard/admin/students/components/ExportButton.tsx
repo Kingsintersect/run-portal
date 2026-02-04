@@ -22,7 +22,7 @@ export function ExportButton() {
     const safePagination = getSafePagination(pagination);
 
     const handleExport = async (format: 'csv' | 'excel' | 'pdf') => {
-        if (!filters.academic_session_id || !filters.semester_id) {
+        if (!filters.academic_session || !filters.program_id) {
             toast.error('Please select academic session and semester before exporting');
             return;
         }
@@ -39,8 +39,8 @@ export function ExportButton() {
             a.href = url;
 
             // Set filename based on filters and format
-            const sessionName = filters.academic_session_id.replace(/\s+/g, '_');
-            const semesterName = filters.semester_id.replace(/\s+/g, '_');
+            const sessionName = filters.academic_session.replace(/\s+/g, '_');
+            const semesterName = filters.program_id.replace(/\s+/g, '_');
             const date = new Date().toISOString().split('T')[0];
             const extension = format === 'csv' ? 'csv' : format === 'excel' ? 'xlsx' : 'pdf';
 
@@ -115,7 +115,7 @@ export function ExportButton() {
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
-                        disabled={!filters.academic_session_id || !filters.semester_id || isExporting || !hasData}
+                        disabled={!filters.academic_session || !filters.program_id || isExporting || !hasData}
                         className="flex items-center gap-2"
                     >
                         <Download className="h-4 w-4" />
