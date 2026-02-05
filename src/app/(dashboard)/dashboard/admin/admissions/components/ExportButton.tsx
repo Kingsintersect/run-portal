@@ -70,17 +70,18 @@ export function ExportButton() {
             return;
         }
 
-        const headers = ['Student ID', 'Name', 'Email', 'Department', 'Program', 'Admission Year', 'Status'];
+        const headers = ['Student ID', 'Name', 'Email', 'Program', 'Accademic Session', 'Status'];
         const csvContent = [
             headers.join(','),
             ...students.map(student => [
-                student.student_id,
-                `"${student.full_name.replace(/"/g, '""')}"`, // Escape quotes in names
+                student.id,
+                student.reference,
+                `"${(student?.first_name ?? '').replace(/"/g, '""')}" + " " + "${(student?.last_name ?? '').replace(/"/g, '""')}"`, // Escape quotes in names
                 student.email,
-                student.department_name,
-                student.program_name,
-                student.admission_year,
-                student.current_status,
+                student.program,
+                // student.program_name,
+                student.accademic_session,
+                student.status,
             ].join(','))
         ].join('\n');
 

@@ -39,7 +39,7 @@ export const ActionMenu = ({ studentId, onCopy }: { studentId: string, onCopy?: 
                     {/* Edit Student */}
                     <DropdownMenuItem asChild>
                         {/* <Link href={`/dashboard/student/${studentId}/edit`}> */}
-                        <Link href={`${baseUrl}/dashboard/update-application-form?id=${studentId}`}>
+                        <Link href={`${basePath}/${studentId}`}>
                             <Edit className="mr-2 h-4 w-4" />
                             <span>Edit Information</span>
                         </Link>
@@ -47,7 +47,7 @@ export const ActionMenu = ({ studentId, onCopy }: { studentId: string, onCopy?: 
                     {/* Edit Student */}
                     <DropdownMenuItem asChild>
                         {/* <Link href={`/dashboard/student/${studentId}/edit`}> */}
-                        <Link href={`${basePath}/${studentId}`}>
+                        <Link href={`${baseUrl}/dashboard/update-application-form?id=${studentId}`}>
                             <Edit className="mr-2 h-4 w-4" />
                             <span>View Application</span>
                         </Link>
